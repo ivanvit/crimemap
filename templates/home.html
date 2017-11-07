@@ -1,18 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Crime Map</title>
-</head>
-<body>
-    <h1> Crime Map</h1>
-    <form action="/add" method="post">
-        <input type="text" name="userinput">
-        <input type="submit" name="Submit">
-    </form>
-    <a href="/clear">clear</a>
-    {% for userinput for data %}
-    <p>{{userinput}}</p>
-    {% endfor %}
-</body>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
+  </head>
+  <body>
+    <h1>CrimeMap</h1>
+    <p> A map of recent criminal activity in the Shahty area.</p>
+    <div id='map'></div>
+    <div id="newcrimeform">
+        <h2>Submit new crime</h2>
+        <form action="/submitcrime" method="post">
+            <label for="category">Category</label>
+            <select name="category" id="category">
+                <option value="mugging">Mugging</option>
+                <option value="breakin">Break-in</option>
+            </select>
+            <label for="date">Date</label>
+            <input name="date" id="date" type="date">
+            <label for="latitude">Latitude</label>
+            <input name="latitude" id="latitude" type="text">
+            <label for="longitude">Longitude</label>
+            <input name="longitude" id="longitude" type="text">
+            <label for="description">Description</label>
+            <textarea name="description" id="description"
+                placeholder="A brief but detailed
+                description of the crime"></textarea>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+      var map;
+      var marker;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 47.70, lng: 40.21},
+          zoom: 12
+        });
+      google.maps.event.addListener(map, 'click', function(event){placeMarker(event.latLng);});
+       function placeMarker(location){
+            if (marker){
+            marker.setPosition(location);}
+            else {
+            var marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+            }
+            document.getElementById('latitude').value = location.lat();
+            document.getElementById('longitude').value = location.lng();
+       }
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWTx6TwsRJvDlFMPfY1926pPKae6wpkVM&callback=initMap"
+    async defer></script>
+  </body>
 </html>
