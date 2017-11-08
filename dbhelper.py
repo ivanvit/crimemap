@@ -1,5 +1,6 @@
 import pymysql
 import dbconfig
+import datetime
 
 class DBHelper:
 
@@ -17,12 +18,33 @@ class DBHelper:
         finally:
             connection.close()
 
+    def get_all_crimes(self):
+        connection  = self.connect()
+        try:
+            query = "SELECT category, date, latitude, longitude, description FROM crimes;"
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                named_crimes = []
+                for crime in cursor:
+                    named_crime ={
+                        'latitude':crime[2],
+                        'longitude':crime[3],
+                        'category':crime[0],
+                        'description':crime[4],
+                        'date': datetime.datetime.strftime(crime[1],'%Y-%m-%d')
+                    }
+                    named_crimes.append(named_crime)
+                return named_crimes
+
+        finally:
+            connection.close()
+
     def add_input(self, data):
         connection  = self.connect()
         try:
-            query = "INSERT INTO crimes (description) VALUES ('{}');".format(data)
+            query = "INSERT INTO crimes (description) VALUES (%s);"
             with connection.cursor() as cursor:
-                cursor.execute(query)
+                cursor.execute(query, data)
                 connection.commit()
         finally:
             connection.close()
@@ -33,6 +55,16 @@ class DBHelper:
             query = "DELETE from crimes;"
             with connection.cursor() as cursor:
                 cursor.execute(query)
+                connection.commit()
+        finally:
+            connection.close()
+
+    def add_crime(self, category, date, longitude, latitude, description):
+        connection = self.connect()
+        try:
+            query = "INSERT INTO crimes (category, date, longitude, latitude, description) VALUES (%s, %s, %s, %s, %s);"
+            with connection.cursor() as cursor:
+                cursor.execute(query, (category, date, longitude, latitude, description))
                 connection.commit()
         finally:
             connection.close()

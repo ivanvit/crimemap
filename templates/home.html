@@ -12,11 +12,15 @@
     <div id='map'></div>
     <div id="newcrimeform">
         <h2>Submit new crime</h2>
+        {% if error_message %}
+        <div id="error">{{error_message}}</div>
+        {% endif %}
         <form action="/submitcrime" method="post">
             <label for="category">Category</label>
             <select name="category" id="category">
-                <option value="mugging">Mugging</option>
-                <option value="breakin">Break-in</option>
+                {% for category in categories %}
+                   <option value="{{category}}">{{category}}</option>
+                {% endfor %}
             </select>
             <label for="date">Date</label>
             <input name="date" id="date" type="date">
@@ -39,8 +43,24 @@
           center: {lat: 47.70, lng: 40.21},
           zoom: 12
         });
+       placeCrimes({{crimes | safe}})
       google.maps.event.addListener(map, 'click', function(event){placeMarker(event.latLng);});
-       function placeMarker(location){
+      }
+
+      function placeCrimes(crimes){
+        for(i=0; i<crimes.length; i++){
+            crime = new google.maps.Marker(
+                {
+                    position: new google.maps.LatLng(crimes[i].latitude, crimes[i].longitude),
+                    map: map,
+                    title: crimes[i].date + "\n" + crimes[i].category + "\n" + crimes[i].description
+
+
+                }
+            );
+
+        }
+      function placeMarker(location){
             if (marker){
             marker.setPosition(location);}
             else {
